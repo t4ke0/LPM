@@ -7,14 +7,15 @@
 - terminaltables
 - pyperclip 
 - sqlite3 
-
+- sudo apt-get install xsel or sudo apt-get install xclip for linux users to get pyperclip work correctly
+- If you are facing some problems with pyperclip read this docs [https://pyperclip.readthedocs.io/en/latest/introduction.html#not-implemented-error]
 
 ## Installation & Usage 
 
 ```
 [python3] 
 
-$ pip3 install <All dependencies above> 
+$ pip3 install -r requirements.txt 
 
 $ python3 passmanager.py 
 
