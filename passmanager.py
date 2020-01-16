@@ -166,7 +166,7 @@ class Main:
 		self.cursor.execute("INSERT INTO users (username,password,email,DBPATH) \
 			VALUES ('%s', '%s','%s' ,'%s')" %(username,pWeH,email,db_path))
 		self.con.commit()
-		self.con.close()
+		
 		#Encrypt  User.db 
 		self.C.encrypt(self.global_db,key)
 		print(self.green,"Encrypted User.db")
