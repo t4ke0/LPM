@@ -166,8 +166,11 @@ class Main:
 		self.cursor.execute("INSERT INTO users (username,password,email,DBPATH) \
 			VALUES ('%s', '%s','%s' ,'%s')" %(username,pWeH,email,db_path))
 		self.con.commit()
-		#self.con.close()
-		print(self.green,"We have generated a key for the encryption of your credentials database",self.reset)
+		self.con.close()
+		#Encrypt  User.db 
+		self.C.encrypt(self.global_db,key)
+		print(self.green,"Encrypted User.db")
+		print(self.green,"We have generated a key for the encryption of your credentials database")
 		print(self.green,"Successfully registred !",self.reset)
 		Avatar.print_avatar()
 		print(f"{self.yellow}Login :{self.reset}")
