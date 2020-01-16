@@ -186,12 +186,15 @@ class Main:
 			pass
 		else :
 			pass 
-		
 
-		#Load the encryption key
-		self.k_key = self.C.load_key(self.Dkey,self.userlogin.strip())
-		#Ecrypt GLOBAL db 
-		self.C.decrypt("User.db.encrypted",self.global_db,self.k_key)
+		try : 
+			#Load the encryption key
+			self.k_key = self.C.load_key(self.Dkey,self.userlogin.strip())
+			#Ecrypt GLOBAL db 
+			self.C.decrypt("User.db.encrypted",self.global_db,self.k_key)
+		except FileNotFoundError : 
+			print("No Suck User registred before / your encryption key file is not in the default path")  
+			self.login()
 
 		# TAKE THE PASSWORD AND ENCRYPT IT THEN COMPARE IT WITH THE OTHER ONE ON THE DB 
 		pswe = hashlib.sha256(bytes(passwd,("utf-8")))
@@ -419,15 +422,6 @@ class Main:
 		else : 
 			self.showUserStuff()
 
-### TODOs ### 
-
-# TODO DELETE CREDS [DONE] delete by typing delete then username="" try to use arg parse if works use it to update the value . 
-# TODO query creds by name of the site [ ]
-# in show creds you can run delete , update commands from the input [DONE]
-# TODO make usage beautifull [100%]
-# TODO remove UPDATE function code and unuseful code [DONE]
-# TODO parseargument with a better way [100%]
-# TODO implement the new parser for that project [100%]
 
 if __name__ == "__main__":
 	m = Main()
@@ -435,174 +429,3 @@ if __name__ == "__main__":
 		m.getUserStuff()
 	except AttributeError:
 		sys.exit()
-
-
-
-
-####### removed code ########
-
-	#def update_value(self,category): 
-		#try :
-			#w = input(f"{self.yellow}Which value you wanna Update\n"
-				#f'username,password,site{self.reset}\n'
-				#f'{self.green}Update Credentials >>> {self.reset}')
-#
-			## if user want to update his password 
-			#if w.lower().strip() == "password":
-				#username = input("Username of the password you wanna change : ")
-				#if username == self.getUserFromCredDb(username,category) :
-					#newpw = input("New password: ")
-					#self.c.execute("UPDATE '%s' SET pw='%s' WHERE user='%s' " %(category,newpw.strip(),username))
-					#self.conn.commit()
-					#print("Your password has been successfully updated")
-					#self.update_value(category)
-				#else : 
-					#print("The Username is wrong")
-					#self.update_value(category)
-#
-			## if user want to update his username 
-			#elif w.lower().strip() == "username" :
-				#user = input(f"{self.green}Old username :{self.reset}")
-				#if user == self.getUserFromCredDb(user,category) :
-					#newuser = input("New username: ")
-					#self.c.execute("UPDATE '%s' SET user='%s' WHERE user='%s' " %(category,newuser.strip(),user))
-					#self.conn.commit()
-					#print(f"{self.green}Your username has been successfully updated{self.reset}")
-					#self.update_value(category)
-				#else : 
-					#print(f"{self.red}Old username is Wrong!{self.reset}")
-					#self.update_value(category)
-#
-			#elif w.lower().strip() == "site" :
-				#user = input("Your Username on that site : ")
-				#if user == self.getUserFromCredDb(user,category) :
-					#newsite = input("New Site : ")
-					#self.c.execute("UPDATE '%s' SET site ='%s' WHERE user='%s' "%(category,newsite.strip(),user))
-					#self.conn.commit()
-					#print("Site info has been successfully updated")
-					#self.update_value(category)
-				#else :
-					#print("Username you have entred is wrong!")
-					#self.update_value(category)
-			#else : 
-				#print(f"There is Nothing Called {w}")
-				#self.update_value(category)
-		#except KeyboardInterrupt :
-			#self.showUserStuff()
-
-
-
-
-
-
-
-
-
-		#elif Fst in cmds :
-			#if Fst == "delete" and len(parse) == 3  :
-				#snd = parse[1]
-				#trd = parse[2]
-				#if re.match(r"\d+",snd) and re.match(r"\w+",trd) : 
-					## Here We delete cred 
-					#try : 
-						#self.c.execute("DELETE FROM '%s' WHERE ID = '%s'" %(trd,snd))
-						#self.conn.commit()
-						#print("Creds has been DELETED")
-						#self.showCredUser()
-					#except Exception as e : 
-						#print("Error table name is incorrect")
-				#else : 
-					#print("the ID Must be an integer")
-					#self.showCredUser()
-#
-			#elif Fst == "update" and len(parse) == 5 :
-				#catg = parse[1] #Category 
-				#typ = parse[2].strip("-") #TYPE 
-				#npwd = parse[3]				
-				#id_ = parse[4] #ID
-				#if re.match(r"\d",id_) and re.match(r"\w+",catg) and re.match(r'\w+',typ):
-					#try : 
-						#if typ == "password":
-							#self.c.execute("UPDATE '%s' SET pw='%s' WHERE ID = '%s'"%(catg,npwd,id_))
-							#self.conn.commit()
-							#print("password UPDATED")
-							#self.showCredUser()
-						#elif typ == "username" :
-							#self.c.execute("UPDATE '%s' SET username='%s' WHERE ID = '%s'"%(catg,npwd,id_))
-							#self.conn.commit()
-							#print("username UPDATED")
-							#self.showCredUser()
-						#elif typ == "site" :
-							#self.c.execute("UPDATE '%s' SET site='%s' WHERE ID = '%s'"%(catg,npwd,id_))
-							#self.conn.commit()
-							#print("site UPDATED")
-							#self.showCredUser()
-						#else :
-							#print(f"Check if category is wrong  ==> {catg} or type of creds ==> {typ}")
-							#self.showCredUser()
-					#except Exception as e :
-						#print("input wrong try again!")
-				#else :
-					#print("Error")
-					#self.showCredUser()
-#
-			#elif Fst == "clear" :
-				#os.system("clear") # to modify to work with windows systems 
-				#self.showCredUser()
-#
-			#elif Fst == "add" and len(parse) == 8 :
-				#catg = parse[1]
-				#Usern= parse[2].strip('-')
-				#Vuser= parse[3]
-				#Pass = parse[4].strip('-')
-				#Vpass= parse[5]
-				#Site = parse[6].strip('-')
-				#Vsite= parse[7]
-#
-				## if statement to make sure that the input is correct 
-				#if re.match(r"\w+",catg) and re.match(r"\w+",Pass) and re.match(r"\w+",Site) :
-					#self.c.execute("INSERT INTO '%s' (user,pw,site) \
-						#VALUES ('%s','%s','%s')" %(catg,Vuser,Vpass,Vsite))
-					#self.conn.commit()
-					#print("Success")
-					#self.showCredUser()
-				#else : 
-					#print("Failed Some arguments are not correct")
-#
-
-
-							#else : 
-				#print("Error not enough args learn how to use cmds by typing help")
-				#self.showCredUser()
-
-
-""" 
-print("Type one of this Categories Where you can store your password :")
-		s = input(
-			"Social""\n"
-			"Email""\n"
-			"Finance""\n"
-			"Shopping""\n"
-			"Other""\n"
-			"Ctrl+c Return back""\n"
-			"Set Category >> ")
-		
-		Site = input("Web site: ") #GET THE WEBSITE
-		username = input("Email/username :") # GET THE USERNAME OR EMAIL
-		password = getpass(stream=sys.stderr) # GET THE PASSWORD 
-		check = input("Do u want to see the password u just have Entered y/n: ") #IF THE USER MAKE A MISTAKE IN HIS PW HE CAN SEE THE PASSWORD BY TYPING Y
-		if check == 'y'.lower() or check == 'y'.upper() : # IF Y ==> Show the password
-			print(password) # Print the password here
-		else : # ELse pass 
-			pass 
-
-		modify = input("DO u want to modify the password y/n: ") # IF A USER WANT TO MODIFY HIS PASSWORD AFTER HE FOUND A MISTAKE ON IT 
-		if modify == "y".lower() or modify == "y".upper() : # IF yes go modfiy
-			npassword = getpass(steam=sys.stderr) # GET THE MODIFIED PASSWORD FROM THE USER
-			password = npassword #REPLACE THE OLD ONE BY THE RECENT ONE 
-		else : 
-			pass 
-
-		ss = s.lower().strip() #REMOVE ALL SPACES FROM USER INPUT "CATEGORY"
-		#ID = self.get_id(self.userlogin)	#ID OF THE USER  #I'm not gonna use the id anymore cause we separate users db each one has his own one now 
-"""
