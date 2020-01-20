@@ -92,6 +92,7 @@ class Main:
 			cursor = con.cursor() # Cursor of registration and login db
 		else : 
 			print("User.db Not found, maybe another user is registered before you !")
+			self.getUserStuff()
 		try : 
 			username = input("Username : ")
 			masterPw = getpass("Master Password : ")
