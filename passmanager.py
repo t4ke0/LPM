@@ -1,4 +1,4 @@
-#! /usr/bin/python3
+#!/usr/bin/python3
 
 
 from symmetric import Crypt 
@@ -21,10 +21,7 @@ import sqlite3,sys,hashlib,re,os,shutil,time,pyperclip
 #Main class it's the First shit you can see When you execute the prog 
 class Main:
 	def __init__(self):
-		#Connecting with our database it's an sqlite3 db 
-		self.con = sqlite3.connect("User.db") # DB for registration and login 
-		self.cursor = self.con.cursor() # Cursor of registration and login db
-		self.get_platform()
+		self.clearScreen()
 		self.progAvatar = Avatar.print_avatar()
 		self.C = Crypt()
 		self.G = PassGen()
@@ -44,50 +41,19 @@ class Main:
 
 # Auxilary functions 
 
-	def get_id(self,username):
 
-		self.cursor.execute("SELECT ID FROM users WHERE USERNAME = '%s'" %(username.strip()))
-		queryid = self.cursor.fetchone()
-		return queryid[0]
-
-	
-	def get_user_db(self,username):
+	def get_user_db(self,username): # This Function queries User's credentials db 
 		self.cursor.execute("SELECT DBPATH FROM users WHERE USERNAME = '%s'" %(username))
 		querydb = self.cursor.fetchone()
 		return querydb[0]
 
-
-	def get_user(self,username):
-		self.cursor.execute("SELECT USERNAME FROM users WHERE  USERNAME='%s'" %(username))
-		queryUser = self.cursor.fetchone()
-		if queryUser is not None:
-			return queryUser[0]
-		else :
-			return []
-
-	def get_email(self,email):
-		self.cursor.execute("SELECT EMAIL from users WHERE EMAIL='%s'" %(email))
-		queryEmail = self.cursor.fetchone()
-		if queryEmail is not None : 
-			return queryEmail[0]
-		else : 
-			return []
-
-	def getUserFromCredDb(self,username,category):
-		self.c.execute("SELECT user FROM '%s' WHERE user = '%s'" %(category,username))
-		queryuser = self.c.fetchone()
-		if queryuser is not None :
-			return queryuser[0]
-		else : 
-			return []
-
-	def get_platform(self):
+	def clearScreen(self): # Clear the Screen 
 		if sys.platform == "linux":
 			return os.system("clear")
 		else : 
 			return os.system("cls")
 
-	def gen_passwd(self,number):
+	def gen_passwd(self,number): # Generating Passwords
 		digits = self.G.digist
 		if number in digits :
 			r = input("Password length: ")
@@ -119,157 +85,154 @@ class Main:
 
 
 	def register(self):
-		username = input("Username : ")
-		masterPw = getpass("Master Password : ")
-		email = input("Email :")
-		reg = re.findall(r'\S+@\S+',email)
+		dir_ = os.listdir()
+		for f in dir_ : 
+			if self.global_db == f : 
+				#Connecting with our database it's an sqlite3 db 
+				con = sqlite3.connect("User.db") # DB for registration and login 
+				cursor = con.cursor() # Cursor of registration and login db
+			else : 
+				print("User.db Not found, maybe another user is registered before you !")
+		try : 
+			username = input("Username : ")
+			masterPw = getpass("Master Password : ")
+			email = input("Email :")
+			reg = re.findall(r'\S+@\S+',email)
 
-		#Ensure that the username is not on our DB 
-		if self.get_user(username) :
-			print(self.red,"User already used! ",self.reset)
-			print(self.red,"Please Try again !",self.reset)
-			self.getUserStuff()
- 
-		elif self.get_email(email):
-			print(self.red,"Email already used!",self.reset)
-			print(self.red,"Please try again !",self.reset)
-			self.getUserStuff()
+			if reg :
+				#Create a db for that particular user
+				db_path = shutil.copy2("defaulcred.db",f"./main_cred_db/{username}.db")
 
-		elif self.get_email == [] or self.get_user == []:
-			pass
+				#Generate a symmetric key for the user
+				self.C.generate_key(self.path_keys,username)
+				key = self.C.load_key(self.path_keys,username)
+				filename = db_path
+				#encrypt the db with that generated key 
+				self.C.encrypt(filename,key)
 
-		elif reg :
-			pass 
+				#TAKE THE PASSWORD AND ENCRYPT IT BEFORE ENTER IT TO THE DB 
+				pWe = hashlib.sha256(bytes(masterPw,('utf-8')))
+				pWeH = pWe.hexdigest()
 
-		else : 
-			self.get_platform()
-			print("Not a Valid email address")
-			print("Retry Please !")
-			Avatar.print_avatar()
-			self.getUserStuff()
+				#Store user stuff into DB
+				cursor.execute("INSERT INTO users (username,password,email,DBPATH) \
+					VALUES ('%s', '%s','%s' ,'%s')" %(username,pWeH,email,db_path))
+				con.commit()
+				
+				#Encrypt  User.db 
+				self.C.encrypt(self.global_db,key)
+				print(self.green,"Encrypted User.db")
+				print(self.green,"We have generated a key for the encryption of your credentials database")
+				print(self.green,"Successfully registred !",self.reset)
+				Avatar.print_avatar()
+				print(f"{self.yellow}Login :{self.reset}")
+				self.login()
+				
+			else : 
+				self.clearScreen()
+				print("Not a Valid email address")
+				print("Retry Please !")
+				Avatar.print_avatar()
+				self.getUserStuff()
 
-		#Create a db for that particular user
-		db_path = shutil.copy2("defaulcred.db",f"./main_cred_db/{username}.db")
-
-		#Generate a symmetric key for the user
-		self.C.generate_key(self.path_keys,username)
-		key = self.C.load_key(self.path_keys,username)
-		filename = db_path
-		#encrypt the db with that generated key 
-		self.C.encrypt(filename,key)
-
-		#TAKE THE PASSWORD AND ENCRYPT IT BEFORE ENTER IT TO THE DB 
-		pWe = hashlib.sha256(bytes(masterPw,('utf-8')))
-		pWeH = pWe.hexdigest()
-
-		#Store user stuff into DB
-		self.cursor.execute("INSERT INTO users (username,password,email,DBPATH) \
-			VALUES ('%s', '%s','%s' ,'%s')" %(username,pWeH,email,db_path))
-		self.con.commit()
-		
-		#Encrypt  User.db 
-		self.C.encrypt(self.global_db,key)
-		print(self.green,"Encrypted User.db")
-		print(self.green,"We have generated a key for the encryption of your credentials database")
-		print(self.green,"Successfully registred !",self.reset)
-		Avatar.print_avatar()
-		print(f"{self.yellow}Login :{self.reset}")
-		self.login()
+		except KeyboardInterrupt : 			
+			self.clearScreen()
+			sys.exit()
 
 	def login(self):
-		self.userlogin = input("Username :")
-		passwd = getpass("Master Password :")
-		self.Dkey = input("Key Path ('What is this press <w>')Default [./keys]: ")
-
-		if self.Dkey == 'w' :
-			print("PATH OF THE ENCRYPTION/DECRYPTION KEY WE HAVE GENERATED FOR YOU ONCE YOU REGISTERED FOR AN ACCOUNT!\n")
-			self.login()
-		elif self.Dkey == "" :
-			self.Dkey = self.path_keys
-			pass
-		else :
-			pass 
-
 		try : 
+			self.userlogin = input("Username :")
+			passwd = getpass("Master Password :")
+			self.Dkey = input("Key Path ('What is this press <w>')Default [./keys]: ")
+
+			if self.Dkey == 'w' :
+				print("PATH OF THE ENCRYPTION/DECRYPTION KEY WE HAVE GENERATED FOR YOU ONCE YOU REGISTERED FOR AN ACCOUNT!\n")
+				self.login()
+			elif self.Dkey == "" :
+				self.Dkey = self.path_keys
+				pass
+			else : 
+				print("Key Path not Found!") 
+				self.login()
+			
 			#Load the encryption key
 			self.k_key = self.C.load_key(self.Dkey,self.userlogin.strip())
-			#Ecrypt GLOBAL db 
+			#decrypt GLOBAL db
 			self.C.decrypt("User.db.encrypted",self.global_db,self.k_key)
-		except FileNotFoundError : 
-			print("No Suck User registred before / your encryption key file is not in the default path")  
-			self.login()
 
-		# TAKE THE PASSWORD AND ENCRYPT IT THEN COMPARE IT WITH THE OTHER ONE ON THE DB 
-		pswe = hashlib.sha256(bytes(passwd,("utf-8")))
-		psweh = pswe.hexdigest()
-		 
-		self.cursor.execute("SELECT * FROM users WHERE username=? AND password=?",(self.userlogin.strip(),psweh.strip())) # Ensure that the username and password are in our DB
+			#Connecting with our database it's an sqlite3 db 
+			con = sqlite3.connect("User.db") # DB for registration and login 
+			cursor = con.cursor() # Cursor of registration and login db
 
-		if self.cursor.fetchone() is not None:  #if True i mean if username & password are in out DB show to user his stuff 
-			print(self.green,"Welcome",self.reset)
-			#load user key
-			self.key = self.C.load_key(self.path_keys,self.userlogin.strip()) #Load the User key that he generate When he registred 
+			# TAKE THE PASSWORD AND ENCRYPT IT THEN COMPARE IT WITH THE OTHER ONE ON THE DB 
+			pswe = hashlib.sha256(bytes(passwd,("utf-8")))
+			psweh = pswe.hexdigest()
+			 
+			cursor.execute("SELECT * FROM users WHERE username=? AND password=?",(self.userlogin.strip(),psweh.strip())) # Ensure that the username and password are in our DB
 
-			#decrypt the db
-			find_dec = f"{self.userlogin.strip()}.db.encrypted" # Find the encrypted DB for each user 
-			dec_file = os.path.join("./main_cred_db",find_dec) 
-			#os.path.join("./main_cred_db",f"{self.userlogin}.db") # get the name of the user db after encryption
-			end_file = self.get_user_db(self.userlogin.strip()) #same above but instead of get in it manually i'm getting the db path from users database 
+			if self.cursor.fetchone() is not None:  #if True i mean if username & password are in out DB show to user his stuff 
+				print(self.green,"Welcome",self.reset)
+				#load user key
+				self.key = self.C.load_key(self.path_keys,self.userlogin.strip()) #Load the User key that he generate When he registred 
 
-			self.C.decrypt(dec_file,end_file,self.key) #Decryption Function you can find the detail about this function in <symmetric.py> file 
+				#decrypt the db
+				find_dec = f"{self.userlogin.strip()}.db.encrypted" # Find the encrypted DB for each user
+				dec_file = os.path.join("./main_cred_db",find_dec) 
+				#os.path.join("./main_cred_db",f"{self.userlogin}.db") # get the name of the user db after encryption
+				end_file = self.get_user_db(self.userlogin.strip()) #same above but instead of get in it manually i'm getting the db path from users database 
 
-			self.db = end_file
-			if self.db == None :
-				print(f"There is no username {self.userlogin} YOU are not registred yet")
+				self.C.decrypt(dec_file,end_file,self.key) #Decryption Function you can find the detail about this function in <symmetric.py> file 
+
+				self.db = end_file
+				if self.db == None :
+					print(f"There is no username {self.userlogin} YOU are not registred yet")
+					self.getUserStuff()
+				self.conn = sqlite3.connect(self.db)
+				self.c = self.conn.cursor()
+
+				self.help_= (							## Help menu ## 
+				f"{self.yellow}[1]Credentials""\n"
+				"[2]Generate Secure password""\n"
+				"help show this Help menu\n"
+				"clear clears the screen\n"
+				f"Ctrl+ C to Exit{self.reset}""\n"
+				)
+				self.clearScreen()
+				Avatar.print_avatar() #Print the ascii art
+				print(self.help_)
+				self.showUserStuff()
+
+			else : #else show logggin failed 
+				print("Failed to login")
+				self.C.encrypt(self.global_db,self.k_key) #If the user failed to login enrypt the global db again 
 				self.getUserStuff()
-			self.conn = sqlite3.connect(self.db) 
-			self.c = self.conn.cursor()
-			#Show to user his Stuff
-			## First Screen Help ## 
-			self.help_= (
-			f"{self.yellow}[1]Credentials""\n"
-			"[2]Generate Secure password""\n"
-			"help show this Help menu\n"
-			"clear clears the screen\n"
-			f"Ctrl+ C to Exit{self.reset}""\n"
-			)
-			self.get_platform()
-			Avatar.print_avatar() #Print the ascii art 
-			print(self.help_)
-			self.showUserStuff() 
-
-		else : #else show logggin failed 
-			print("Failed to login")
-			self.C.encrypt(self.global_db,self.k_key) #If the user failed to login enrypt the global db again 
-			self.getUserStuff()
-
-
+		except KeyboardInterrupt : 
+			self.C.encrypt(self.global_db,self.k_key)
+			filen = self.db
+			self.C.encrypt(filen,self.key)
+			self.clearScreen()
+			sys.exit()
 
 ###### END of Auxilary functions ######
 
 
-	def getUserStuff(self):
-		try : 
+	def getUserStuff(self): # Main menu 
+		try :
 			self.w = input("Login/Register :")
-			if self.w.strip() == "register" : # if user typed register show him the registration elements
-				self.register()	
-				
-			elif self.w.strip() == "login" : # otherwise he want to login show him login elements 
-				self.login()
-
-			else : 
-				print("Retry again")
-				self.getUserStuff()
-		except KeyboardInterrupt: 
-			#self.conn.close() #Close the DB While closing the program
-			print("Exiting ....")
-			self.C.encrypt(self.global_db,self.k_key)
-			filen = self.db
-			self.C.encrypt(filen,self.key)
-			self.get_platform() # clear terminal screen while exiting 
+		except KeyboardInterrupt :
+			self.clearScreen()
 			sys.exit()
+		if self.w.strip() == "register" : # if user typed register show him the registration elements
+			self.register()	
+				
+		elif self.w.strip() == "login" : # otherwise he want to login show him login elements 
+			self.login()
+
+		else : 
+			print("Retry again")
+			self.getUserStuff()
 	
-	def saveUserStuff(self,username,password,site,category): # replacing 
+	def saveUserStuff(self,username,password,site,category): 
 		try : 
 			self.c.execute("INSERT INTO '%s' (user,pw,site) \
 				VALUES ('%s','%s','%s')" %(category,username,password,site)) #Inserting Crendentials into our DB 
@@ -363,7 +326,7 @@ class Main:
 			self.showCredUser() # redirect the user to the beginning of the function again 
 
 		elif s.lower() == "clear" :
-			self.get_platform()
+			self.clearScreen()
 			Avatar.print_avatar()
 			self.showCredUser()
 
@@ -415,7 +378,7 @@ class Main:
 				print("")
 				self.showUserStuff()
 		elif q == "clear":
-			self.get_platform()
+			self.clearScreen()
 			Avatar.print_avatar()
 			self.showUserStuff()
 
@@ -431,4 +394,7 @@ if __name__ == "__main__":
 	try : 
 		m.getUserStuff()
 	except AttributeError:
+		m.clearScreen()
 		sys.exit()
+
+# Todo Create for Each User who registred a separated global db or Allow for one User to be registred 
