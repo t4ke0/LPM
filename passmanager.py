@@ -168,7 +168,7 @@ class Main:
 			pswe = hashlib.sha256(bytes(passwd,("utf-8")))
 			psweh = pswe.hexdigest()
 			 
-			cursor.execute("SELECT * FROM users WHERE username=? AND password=?",(self.userlogin.strip(),psweh.strip())) # Ensure that the username and password are in our DB
+			self.cursor.execute("SELECT * FROM users WHERE username=? AND password=?",(self.userlogin.strip(),psweh.strip())) # Ensure that the username and password are in our DB
 
 			if self.cursor.fetchone() is not None:  #if True i mean if username & password are in out DB show to user his stuff 
 				print(self.green,"Welcome",self.reset)
