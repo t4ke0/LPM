@@ -85,14 +85,13 @@ class Main:
 
 
 	def register(self):
-		dir_ = os.listdir()
-		for f in dir_ : 
-			if self.global_db == f : 
-				#Connecting with our database it's an sqlite3 db 
-				con = sqlite3.connect("User.db") # DB for registration and login 
-				cursor = con.cursor() # Cursor of registration and login db
-			else : 
-				print("User.db Not found, maybe another user is registered before you !")
+		dir_ = os.listdir() 
+		if self.global_db in dir_ : 
+			#Connecting with our database it's an sqlite3 db 
+			con = sqlite3.connect("User.db") # DB for registration and login 
+			cursor = con.cursor() # Cursor of registration and login db
+		else : 
+			print("User.db Not found, maybe another user is registered before you !")
 		try : 
 			username = input("Username : ")
 			masterPw = getpass("Master Password : ")
