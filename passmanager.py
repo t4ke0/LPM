@@ -149,8 +149,12 @@ class Main:
 				print("PATH OF THE ENCRYPTION/DECRYPTION KEY WE HAVE GENERATED FOR YOU ONCE YOU REGISTERED FOR AN ACCOUNT!\n")
 				self.login()
 			elif self.Dkey == "" :
-				self.Dkey = self.path_keys
-				pass
+				try : 
+					self.Dkey = self.path_keys
+					pass
+				except FileNotFoundError : 
+					print("We can find your key!")
+					self.login()
 			else : 
 				print("Key Path not Found!") 
 				self.login()
