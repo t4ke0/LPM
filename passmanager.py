@@ -148,16 +148,19 @@ class Main:
 			if self.Dkey == 'w' :
 				print("PATH OF THE ENCRYPTION/DECRYPTION KEY WE HAVE GENERATED FOR YOU ONCE YOU REGISTERED FOR AN ACCOUNT!\n")
 				self.login()
-			elif self.Dkey == "" or "./keys" or "keys" :			
+			elif self.Dkey == "" :
 				self.Dkey = self.path_keys
+				#Load the encryption key			
+				self.k_key = self.C.load_key(self.Dkey,self.userlogin.strip())
 				pass
 
 			else : 
-				print("Key Path not Found!") 
-				self.login()
-			try : 
 				#Load the encryption key
 				self.k_key = self.C.load_key(self.Dkey,self.userlogin.strip())
+				pass
+				
+			try : 
+				
 				#decrypt GLOBAL db
 				self.C.decrypt("User.db.encrypted",self.global_db,self.k_key)
 
@@ -210,7 +213,7 @@ class Main:
 			except FileNotFoundError :
 				print("KEY NOT FOUND!")
 				self.login()
-				
+
 		except KeyboardInterrupt : 
 			self.C.encrypt(self.global_db,self.k_key)
 			filen = self.db
