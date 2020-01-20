@@ -215,7 +215,7 @@ class Main:
 		except KeyboardInterrupt : 
 			self.C.encrypt(self.global_db,self.k_key)
 			filen = self.db
-			self.C.encrypt(filen,self.key)
+			self.C.encrypt(filen,self.k_key)
 			self.clearScreen()
 			sys.exit()
 
