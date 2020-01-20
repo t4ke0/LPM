@@ -28,7 +28,7 @@ class Main:
 		self.Parser = ParseArg()
 		self.path_keys= "./keys"
 		self.pathDir = "./main_cred_db"
-		self.global_db = './User.db'
+		self.global_db = "User.db"
 
 		#######Colors#######
 		self.fore = Fore
