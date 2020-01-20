@@ -161,8 +161,8 @@ class Main:
 			self.C.decrypt("User.db.encrypted",self.global_db,self.k_key)
 
 			#Connecting with our database it's an sqlite3 db 
-			con = sqlite3.connect("User.db") # DB for registration and login 
-			cursor = con.cursor() # Cursor of registration and login db
+			self.con = sqlite3.connect("User.db") # DB for registration and login 
+			self.cursor = self.con.cursor() # Cursor of registration and login db
 
 			# TAKE THE PASSWORD AND ENCRYPT IT THEN COMPARE IT WITH THE OTHER ONE ON THE DB 
 			pswe = hashlib.sha256(bytes(passwd,("utf-8")))
