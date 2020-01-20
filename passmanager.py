@@ -143,7 +143,7 @@ class Main:
 		try : 
 			self.userlogin = input("Username :")
 			passwd = getpass("Master Password :")
-			self.Dkey = input("Key Path ('What is this press <w>')Default [./keys]: ")
+			self.Dkey = input("Key Path ('What is this press <w>')Default [./keys]: ").strip()
 
 			if self.Dkey == 'w' :
 				print("PATH OF THE ENCRYPTION/DECRYPTION KEY WE HAVE GENERATED FOR YOU ONCE YOU REGISTERED FOR AN ACCOUNT!\n")
@@ -159,7 +159,7 @@ class Main:
 				self.k_key = self.C.load_key(self.Dkey,self.userlogin.strip())
 				pass
 				
-			try : 
+			try :
 				
 				#decrypt GLOBAL db
 				self.C.decrypt("User.db.encrypted",self.global_db,self.k_key)
@@ -176,16 +176,14 @@ class Main:
 
 				if self.cursor.fetchone() is not None:  #if True i mean if username & password are in out DB show to user his stuff 
 					print(self.green,"Welcome",self.reset)
-					#load user key
-					self.key = self.C.load_key(self.path_keys,self.userlogin.strip()) #Load the User key that he generate When he registred 
-
+					
 					#decrypt the db
 					find_dec = f"{self.userlogin.strip()}.db.encrypted" # Find the encrypted DB for each user
-					dec_file = os.path.join("./main_cred_db",find_dec) 
+					dec_file = os.path.join("./main_cred_db",find_dec)
 					#os.path.join("./main_cred_db",f"{self.userlogin}.db") # get the name of the user db after encryption
 					end_file = self.get_user_db(self.userlogin.strip()) #same above but instead of get in it manually i'm getting the db path from users database 
 
-					self.C.decrypt(dec_file,end_file,self.key) #Decryption Function you can find the detail about this function in <symmetric.py> file 
+					self.C.decrypt(dec_file,end_file,self.k_key) #Decryption Function you can find the detail about this function in <symmetric.py> file 
 
 					self.db = end_file
 					if self.db == None :
